@@ -1,14 +1,14 @@
 
 
-class Vehicle {
+class Enemy {
   constructor(x, y){
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(0, -2);
     this.position = createVector(x, y);
     this.r = 6;
-    this.maxspeed = 8;
-    this.maxforce = 0.2;
-    this.sprite = createSprite(mouseX,mouseY,50,50);
+    this.maxspeed = 15;
+    this.maxforce = 0.5;
+    this.sprite = createSprite(x,y,50,50);
 
   }
 
@@ -57,14 +57,12 @@ display() {
     strokeWeight(1);
     push();
     translate(this.position.x,this.position.y);
-    rotate(theta); //
-    beginShape();
-    vertex(0, -this.r * 2);
-    vertex(-this.r, this.r * 2);
-    vertex(this.r, this.r * 2);
-    endShape(CLOSE);
+    rotate(theta); 
+    rectMode(CENTER);
+    rect(0,0,25);
+    rect(0,-13,8);
     pop();
-    drawSprites();
+    //drawSprites();
 
   }
 
@@ -99,13 +97,14 @@ class Player {
   }
 }
 
-let v;
-
+let enemy1;
+let enemy2;
 let player;
 
 function setup() {
   createCanvas(800, 800);
-  v = new Vehicle(width/2, height/2);
+  enemy1 = new Enemy(200,100);
+  enemy2 = new Enemy(600,100);
   player = new Player(400,400);
 
 }
@@ -115,7 +114,13 @@ function draw() {
   background(51);
   player.movement();
   player.display();
-  v.seek(player.position);
-  v.update();
-  v.display();
+
+  enemy1.seek(player.position);
+  enemy2.seek(player.position);
+
+  enemy1.update();
+  enemy2.update();
+
+  enemy1.display();
+  enemy2.display();
 }
