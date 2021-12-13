@@ -1,28 +1,35 @@
 
 
 class Enemy {
-  constructor(x, y){
-    this.acceleration = createVector(0, 0);
-    this.velocity = createVector(0, -2);
-    this.position = createVector(x, y);
-    this.r = 6;
-    this.maxspeed = 15;
-    this.maxforce = 0.5;
+  constructor(x, y,r,g,b){
+    /*
+    this.sprite.acceleration = createVector(0, 0);
+    this.sprite.velocity = createVector(0, -2);
+    this.sprite.position = createVector(x, y);
+    */
+    this.maxspeed = 10;
+    this.maxforce = 0.2;
     this.sprite = createSprite(x,y,50,50);
-
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.sprite.acceleration = createVector(0,0);
+    //this.sprite.topSpeed = 15;
+    //this.sprite.friction = 0.05;
   }
 
 
 // Method to update location
   update() {
      
-    this.velocity.add(this.acceleration);
-    this.velocity.limit(this.maxspeed);
-
-    this.position.add(this.velocity);
+    this.sprite.velocity.add(this.sprite.acceleration);
+    this.sprite.velocity.limit(this.maxspeed);
+    this.sprite.position.add(this.sprite.velocity);
+    /*
     this.sprite.position.x = this.position.x;
     this.sprite.position.y = this.position.y;
-    this.acceleration.mult(0);
+    */
+    this.sprite.acceleration.mult(0);
 
 
   }
@@ -30,18 +37,18 @@ class Enemy {
 
 applyForce(force){
  // We could add mass here if we want A = F / M
-    this.acceleration.add(force);
+    this.sprite.acceleration.add(force);
 
 }  
 
 seek(target){
 
-  let desired = p5.Vector.sub(target, this.position);
+  let desired = p5.Vector.sub(target, this.sprite.position);
 
   desired.setMag(this.maxspeed);
 
   //steering:
-  let steer = p5.Vector.sub(desired, this.velocity);
+  let steer = p5.Vector.sub(desired, this.sprite.velocity);
   steer.limit(this.maxforce);
 
   this.applyForce(steer);
@@ -50,13 +57,13 @@ seek(target){
 }
 
 display() {
-    let theta = this.velocity.heading() + PI/2;
+    let theta = this.sprite.velocity.heading() + PI/2;
 
-    fill(127);
+    fill(this.r,this.g,this.b);
     stroke(200);
     strokeWeight(1);
     push();
-    translate(this.position.x,this.position.y);
+    translate(this.sprite.position.x,this.sprite.position.y);
     rotate(theta); 
     rectMode(CENTER);
     rect(0,0,25);
@@ -70,21 +77,33 @@ display() {
 
 class Player {
   constructor(x,y){
-    this.position = createVector(x,y);
+    this.sprite = createSprite(x,y,50,50);
   }
 
   movement(){
     if (keyDown("w")){
-      this.position.y -= 7;
+      this.sprite.position.y -= 7;
     }
     if (keyDown("a")){
-      this.position.x -= 7;
+      this.sprite.position.x -= 7;
     }
     if (keyDown("s")){
-      this.position.y += 7;
+      this.sprite.position.y += 7;
     }
     if (keyDown("d")){
-      this.position.x += 7;
+      this.sprite.position.x += 7;
+    }
+    if (this.sprite.position.x <= 0){
+      this.sprite.position.x = 0;
+    }
+    if (this.sprite.position.x >= width){
+      this.sprite.position.x = width;
+    }
+    if (this.sprite.position.y <= 0){
+      this.sprite.position.y = 0;
+    }
+    if (this.sprite.position.y >= height){
+      this.sprite.position.y = height;
     }
   }
 
@@ -93,7 +112,7 @@ class Player {
     stroke(200);
     strokeWeight(2);
     rectMode(CENTER);
-    rect(this.position.x,this.position.y,25);
+    rect(this.sprite.position.x,this.sprite.position.y,25);
   }
 }
 
@@ -102,9 +121,9 @@ let enemy2;
 let player;
 
 function setup() {
-  createCanvas(800, 800);
-  enemy1 = new Enemy(200,100);
-  enemy2 = new Enemy(600,100);
+  createCanvas(800, 700);
+  enemy1 = new Enemy(200,100,235,64,52);
+  enemy2 = new Enemy(600,100,242,242,24);
   player = new Player(400,400);
 
 }
@@ -112,11 +131,13 @@ function setup() {
 
 function draw() {
   background(51);
+
+
   player.movement();
   player.display();
 
-  enemy1.seek(player.position);
-  enemy2.seek(player.position);
+  enemy1.seek(player.sprite.position);
+  enemy2.seek(player.sprite.position);
 
   enemy1.update();
   enemy2.update();
