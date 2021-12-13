@@ -9,13 +9,12 @@ class Enemy {
     */
     this.maxspeed = 10;
     this.maxforce = 0.2;
-    this.sprite = createSprite(x,y,50,50);
+    this.sprite = createSprite(x,y,27,27);
     this.r = r;
     this.g = g;
     this.b = b;
     this.sprite.acceleration = createVector(0,0);
-    //this.sprite.topSpeed = 15;
-    //this.sprite.friction = 0.05;
+
   }
 
 
@@ -77,7 +76,7 @@ display() {
 
 class Player {
   constructor(x,y){
-    this.sprite = createSprite(x,y,50,50);
+    this.sprite = createSprite(x,y,27,27);
   }
 
   movement(){
@@ -116,14 +115,43 @@ class Player {
   }
 }
 
+class Playspace{
+  constructor(){
+    this.group = new Group();
+
+    this.leftWall = createSprite(0,height/2,50,height);
+    this.topWall = createSprite(width/2,0,width,50);
+    this.rightWall = createSprite(width,height/2,50,height);
+    this.bottomWall = createSprite(width/2,height,width,50);
+
+    this.leftWall.immovable = true;
+    this.topWall.immovable = true;
+    this.rightWall.immovable = true;
+    this.bottomWall.immovable = true;
+
+    this.group.add(this.leftWall);
+    this.group.add(this.topWall);
+    this.group.add(this.rightWall);
+    this.group.add(this.bottomWall);
+  }
+}
+
+let playspace;
 let enemy1;
 let enemy2;
+let enemies;
 let player;
+
+
 
 function setup() {
   createCanvas(800, 700);
+  playspace = new Playspace();
+  enemies = new Group();
   enemy1 = new Enemy(200,100,235,64,52);
   enemy2 = new Enemy(600,100,242,242,24);
+  enemies.add(enemy1.sprite);
+  enemies.add(enemy2.sprite);
   player = new Player(400,400);
 
 }
@@ -132,6 +160,9 @@ function setup() {
 function draw() {
   background(51);
 
+  enemies.bounce(enemies);
+  enemies.bounce(playspace.group);
+  enemies.bounce(player.sprite);
 
   player.movement();
   player.display();
@@ -142,6 +173,16 @@ function draw() {
   enemy1.update();
   enemy2.update();
 
+
   enemy1.display();
   enemy2.display();
+
+  line(enemy1.sprite.position.x,enemy1.sprite.position.y,player.sprite.position.x,player.sprite.position.y);
+  line(enemy2.sprite.position.x,enemy2.sprite.position.y,player.sprite.position.x,player.sprite.position.y);
+
+  drawSprites();
+
+
 }
+
+
