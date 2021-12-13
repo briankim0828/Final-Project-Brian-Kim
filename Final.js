@@ -137,11 +137,19 @@ class Playspace{
 }
 
 let playspace;
+
 let enemy1;
 let enemy2;
 let enemies;
+
 let player;
 
+let start;
+let pause = false;
+let end;
+
+let storeSpeed = [];
+let storeDir = [];
 
 
 function setup() {
@@ -160,19 +168,25 @@ function setup() {
 function draw() {
   background(51);
 
-  enemies.bounce(enemies);
-  enemies.bounce(playspace.group);
-  enemies.bounce(player.sprite);
+  if (pause == true){
 
-  player.movement();
+  } else { 
+    enemies.bounce(enemies);
+    enemies.bounce(playspace.group);
+    //enemies.bounce(player.sprite);
+
+    player.movement();
+    player.display();
+
+    enemy1.seek(player.sprite.position);
+    enemy2.seek(player.sprite.position);
+
+    enemy1.update();
+    enemy2.update();
+  }
+
+ 
   player.display();
-
-  enemy1.seek(player.sprite.position);
-  enemy2.seek(player.sprite.position);
-
-  enemy1.update();
-  enemy2.update();
-
 
   enemy1.display();
   enemy2.display();
@@ -181,6 +195,31 @@ function draw() {
   line(enemy2.sprite.position.x,enemy2.sprite.position.y,player.sprite.position.x,player.sprite.position.y);
 
   drawSprites();
+
+  console.log(pause);
+
+  if (keyWentDown(ESCAPE)){
+    if (pause == false){
+      pause = true;
+      storeSpeed[0] = enemy1.sprite.getSpeed();
+      storeDir[0] = enemy1.sprite.getDirection();
+      storeSpeed[1] = enemy2.sprite.getSpeed();
+      storeDir[1] = enemy2.sprite.getDirection();
+      enemy1.sprite.setSpeed(0.0000001);
+      enemy2.sprite.setSpeed(0.0000001);
+   } else {
+      pause = false;
+      enemy1.sprite.setSpeed(storeSpeed[0],storeDir[0]);
+      enemy2.sprite.setSpeed(storeSpeed[1],storeDir[1]);
+   }
+  }
+
+  /*
+  if (player.sprite.overlap(enemy1.sprite) || player.sprite.overlap(enemy2.sprite)){
+    console.log("end");
+    end = true; 
+  }
+  */
 
 
 }
