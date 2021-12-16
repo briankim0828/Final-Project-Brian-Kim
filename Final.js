@@ -1,7 +1,7 @@
 
-class Playspace{
+class Playspace{  //class that creates the playable area
   constructor(){
-    this.group = new Group();
+    this.group = new Group(); // group of sprites that make up the playspace
 
     this.leftWall = createSprite(0,height/2,50,height);
     this.topWall = createSprite(width/2,0,width,50);
@@ -18,13 +18,12 @@ class Playspace{
     this.group.add(this.rightWall);
     this.group.add(this.bottomWall);
 
-
     //drawSprites();
   }
 }
 
 class Enemy {
-  constructor(x, y,r,g,b){
+  constructor(x, y,r,g,b){ //enemy Class. InitialX point, Initial Y point, and color
     /*
     this.sprite.acceleration = createVector(0, 0);
     this.sprite.velocity = createVector(0, -2);
@@ -32,8 +31,8 @@ class Enemy {
     */
     this.initialX = x;
     this.initialY = y;
-    this.maxspeed = 10;
-    this.maxforce = 0.17;
+    this.maxspeed = 10;     //max speed of the enemies
+    this.maxforce = 0.17;   //how quickly the enemies can change direction
     this.sprite = createSprite(x,y,27,27);
     this.r = r;
     this.g = g;
@@ -44,7 +43,7 @@ class Enemy {
 
 
 // Method to update location
-  update(gamestate) {
+  update() {
      
     this.sprite.velocity.add(this.sprite.acceleration);
     this.sprite.velocity.limit(this.maxspeed);
@@ -55,7 +54,7 @@ class Enemy {
     */
     this.sprite.acceleration.mult(0);
 
-    if (gamestate == false){
+    if (!gameState){  //if player dies the position and velocity resets
       this.sprite.position.x = this.initialX;
       this.sprite.position.y = this.initialY;
       this.sprite.velocity.x = 0;
@@ -72,7 +71,7 @@ applyForce(force){
 
 }  
 
-seek(target){
+seek(target){  //seek towards a given vecotr in the parameter
 
   let desired = p5.Vector.sub(target, this.sprite.position);
 
@@ -87,7 +86,7 @@ seek(target){
 
 }
 
-display() {
+display() {     //displaying the enemies
     let theta = this.sprite.velocity.heading() + PI/2;
 
     fill(this.r,this.g,this.b);
@@ -106,15 +105,15 @@ display() {
 
 }
 
-class Player {
+class Player {  //player class
   constructor(x,y){
     this.initialX = x;
     this.initialY = y;
     this.sprite = createSprite(x,y,27,27);
-    this.sprite.friction = .09;
+    this.sprite.friction = .09;  //visual feedback for when getting hit
   }
 
-  movement(){
+  movement(){  //basic movement controls
     if (keyDown("w")){
       this.sprite.position.y -= 7;
     }
@@ -140,7 +139,7 @@ class Player {
       this.sprite.position.y = height;
     }
 
-    if (!gameState){
+    if (!gameState){ //resets at death
       this.sprite.position.x = this.initialX;
       this.sprite.position.y = this.initialY;
       this.sprite.velocity.x = 0;
@@ -157,18 +156,18 @@ class Player {
   }
 }
 
-class Point{
+class Point{  //point box class
   constructor(x,y){
     this.x = x;
     this.y = y;
-    this.size = 0;
-    this.shrink = false;
+    this.size = 0; //length of one side of the box
+    this.shrink = false; //flag for shrinking and emerging
     this.sprite = createSprite(this.x, this.y, 50, 50);
   }
 
   display(pt,prevpt){
 
-    if (this.shrink == false){
+    if (!this.shrink){ 
       this.size += 2;
       if (this.size>50){
         this.size = 50;
@@ -180,7 +179,7 @@ class Point{
       textAlign(CENTER,CENTER);
       textSize(this.size-15);
       fill(255);
-      text(pt,this.x,this.y);
+      text(pt,this.x,this.y); //when emerging, the box contains the pt
 
     } else {
       this.size -= 2;
@@ -196,7 +195,7 @@ class Point{
       textAlign(CENTER,CENTER);
       textSize(this.size-15);
       fill(255);
-      text(prevpt,this.x,this.y);
+      text(prevpt,this.x,this.y); //when shrinking, displays prevpt
     }
   }
 
@@ -208,6 +207,7 @@ class Point{
   }
 }
 
+//Class variables
 let playspace;
 
 let enemy1;
@@ -217,8 +217,14 @@ let enemies;
 let player;
 
 let point;
+
+//Gameplay variables
 let pointcount = 1;
 let previousPoint;
+
+let highScore = 0;
+
+let lives = 2;
 
 let gameState = false;
 let start;
@@ -256,8 +262,10 @@ function draw() {
     textSize(50);
     fill(255);
     text("JUKE THE BOX",width/2,height/2-60);
+    textSize(18);
+    text("HIGH SCORE: "+highScore,width/2,height/2-25);
 
-    textSize(20);
+    textSize(18);
     text("W, A, S, D to Move",width/2,height-225);
     text("Dodge Red And Yellow",width/2,height-200);
     text("Get As Much Points",width/2,height-175);
@@ -265,18 +273,31 @@ function draw() {
 
     textSize(27);
     text("GOOD LUCK",width/2,height-100)
-
+    
     if(keyDown("w") || keyDown("a") || keyDown("s") || keyDown("d")){
       gameState = true;
     }
+
   } else if (gameState){ 
 
-    if(player.sprite.overlap(enemies)){
-      gameState = false;
-      previousPoint = 0;
-      pointcount = 1;
+    if(point.test(player.sprite)){  //Point system/Highscore system
+      previousPoint = pointcount;
+      pointcount ++;
+      if (previousPoint > highScore){
+        highScore = previousPoint;
+      }
     }
-    
+
+    if(player.sprite.overlap(enemies)){
+      lives--;
+      if (lives == 0){
+        gameState = false;
+        previousPoint = 0;
+        pointcount = 1;
+        lives = 2;
+      }
+    }
+
     enemies.bounce(enemies);
     enemies.bounce(playspace.group);
     enemies.bounce(player.sprite);
@@ -292,11 +313,6 @@ function draw() {
     enemy2.update(gameState);
 
     point.display(pointcount,previousPoint);
-
-    if(point.test(player.sprite)){
-      previousPoint = pointcount;
-      pointcount ++;
-    }
   }
 
  
