@@ -30,6 +30,8 @@ class Enemy {
     this.sprite.velocity = createVector(0, -2);
     this.sprite.position = createVector(x, y);
     */
+    this.initialX = x;
+    this.initialY = y;
     this.maxspeed = 10;
     this.maxforce = 0.17;
     this.sprite = createSprite(x,y,27,27);
@@ -42,7 +44,7 @@ class Enemy {
 
 
 // Method to update location
-  update() {
+  update(gamestate) {
      
     this.sprite.velocity.add(this.sprite.acceleration);
     this.sprite.velocity.limit(this.maxspeed);
@@ -52,6 +54,13 @@ class Enemy {
     this.sprite.position.y = this.position.y;
     */
     this.sprite.acceleration.mult(0);
+
+    if (gamestate == false){
+      this.sprite.position.x = this.initialX;
+      this.sprite.position.y = this.initialY;
+      this.sprite.velocity.x = 0;
+      this.sprite.velocity.y = 0;
+    }
 
 
   }
@@ -99,6 +108,8 @@ display() {
 
 class Player {
   constructor(x,y){
+    this.initialX = x;
+    this.initialY = y;
     this.sprite = createSprite(x,y,27,27);
     this.sprite.friction = .09;
   }
@@ -127,6 +138,13 @@ class Player {
     }
     if (this.sprite.position.y >= height){
       this.sprite.position.y = height;
+    }
+
+    if (!gameState){
+      this.sprite.position.x = this.initialX;
+      this.sprite.position.y = this.initialY;
+      this.sprite.velocity.x = 0;
+      this.sprite.velocity.y = 0;
     }
   }
 
@@ -192,8 +210,6 @@ class Point{
 
 let playspace;
 
-let screen = 0;
-
 let enemy1;
 let enemy2;
 let enemies;
@@ -201,9 +217,10 @@ let enemies;
 let player;
 
 let point;
-let pointcount = 0;
+let pointcount = 1;
 let previousPoint;
 
+let gameState = false;
 let start;
 let pause = false;
 let end;
@@ -233,17 +250,33 @@ function draw() {
   fill(10,30,40);
   rect(25,25,width-50,height-50);
 
-  if (pause == true || screen != 1){
+  if (pause || !gameState){
 
     textAlign(CENTER,CENTER);
     textSize(50);
     fill(255);
     text("JUKE THE BOX",width/2,height/2-60);
 
+    textSize(20);
+    text("W, A, S, D to Move",width/2,height-225);
+    text("Dodge Red And Yellow",width/2,height-200);
+    text("Get As Much Points",width/2,height-175);
+    text("Two Lives",width/2,height-150);
+
+    textSize(27);
+    text("GOOD LUCK",width/2,height-100)
+
     if(keyDown("w") || keyDown("a") || keyDown("s") || keyDown("d")){
-      screen = 1;
+      gameState = true;
     }
-  } else if (screen == 1){ 
+  } else if (gameState){ 
+
+    if(player.sprite.overlap(enemies)){
+      gameState = false;
+      previousPoint = 0;
+      pointcount = 1;
+    }
+    
     enemies.bounce(enemies);
     enemies.bounce(playspace.group);
     enemies.bounce(player.sprite);
@@ -255,8 +288,8 @@ function draw() {
     enemy1.seek(player.sprite.position);
     enemy2.seek(player.sprite.position);
 
-    enemy1.update();
-    enemy2.update();
+    enemy1.update(gameState);
+    enemy2.update(gameState);
 
     point.display(pointcount,previousPoint);
 
