@@ -111,6 +111,7 @@ class Player {  //player class
     this.initialY = y;
     this.sprite = createSprite(x,y,27,27);
     this.sprite.friction = .09;  //visual feedback for when getting hit
+    this.opacity = 255;
   }
 
   movement(){  //basic movement controls
@@ -147,12 +148,38 @@ class Player {  //player class
     }
   }
 
-  display(){
-    fill(127);
-    stroke(200);
-    strokeWeight(2);
-    rectMode(CENTER);
-    rect(this.sprite.position.x,this.sprite.position.y,25);
+  display(colDetect){
+    if(colDetect){
+      this.opacity = 255;
+      fill(random(0,255),random(0,255),random(0,255),this.opacity);
+      stroke(200);
+      strokeWeight(2);
+      rectMode(CENTER);
+      rect(this.sprite.position.x+random(-30,30),this.sprite.position.y+random(-30,30),30);
+
+      fill(random(0,255),random(0,255),random(0,255),this.opacity);
+      stroke(200);
+      strokeWeight(2);
+      rect(this.sprite.position.x+random(-30,30),this.sprite.position.y+random(-30,30),30);
+
+      fill(random(0,255),random(0,255),random(0,255),this.opacity);
+      stroke(200);
+      strokeWeight(2);
+      rect(this.sprite.position.x+random(-30,30),this.sprite.position.y+random(-30,30),30);
+
+    } else{
+      fill(127);
+      stroke(200);
+      strokeWeight(2);
+      rectMode(CENTER);
+      rect(this.sprite.position.x,this.sprite.position.y,25);
+    }
+    if(this.opacity>0){
+      this.opacity-=5;
+    } else {
+      this.opacity = 0;
+    }
+
   }
 }
 
@@ -175,6 +202,9 @@ class Point{  //point box class
       this.sprite.position.x = this.x;
       this.sprite.position.y = this.y;
       fill(47, 134, 161,150);
+      stroke(200);
+      strokeWeight(3);
+      rectMode(CENTER);
       rect(this.x, this.y, this.size);
       textAlign(CENTER,CENTER);
       textSize(this.size-15);
@@ -191,6 +221,9 @@ class Point{  //point box class
       this.sprite.position.x = this.x;
       this.sprite.position.y = this.y;
       fill(47, 134, 161,150);
+      stroke(200);
+      strokeWeight(3);
+      rectMode(CENTER);
       rect(this.x, this.y, this.size);
       textAlign(CENTER,CENTER);
       textSize(this.size-15);
@@ -206,6 +239,31 @@ class Point{  //point box class
     }
   }
 }
+
+/*
+class Particle{
+
+  constructor(x,y){
+    this.x = x;
+    this.y = y;
+    this.sprite = createSprite(x,y,4,4);
+    this.alpha = 255; 
+  }
+
+  display(){
+    stroke(255);
+    fill(200,this.alpha);
+    ellipse(this.sprite.position.x,this.sprite.position.y,6);
+  }
+
+  update(){
+    this.sprite.velocity.add(createVector(random(0,10),random(0,10)));
+    this.sprite.position.add(this.sprite.velocity);
+    this.alpha--;
+  }
+
+}
+*/
 
 //Class variables
 let playspace;
@@ -224,18 +282,27 @@ let previousPoint;
 
 let highScore = 0;
 
-let lives = 2;
+let lives = 3;
 
 let gameState = false;
 let start;
 let pause = false;
 let end;
 
+let collision = false;
+let count;  //counting frames for showing visual feedback for player collision
+
 let storeSpeed = [];
 let storeDir = [];
 
+let p;
+let particles = [];
+
+
+
 
 function setup() {
+
   createCanvas(800, 700);
   background(100);
   playspace = new Playspace();
@@ -247,6 +314,7 @@ function setup() {
   player = new Player(400,400);
   point = new Point(random(50,width-50),random(50,height-50));
 
+  //p = new Particle(player.sprite.position.x,player.sprite.position.y);
 }
 
 
@@ -269,7 +337,7 @@ function draw() {
     text("W, A, S, D to Move",width/2,height-225);
     text("Dodge Red And Yellow",width/2,height-200);
     text("Get As Much Points",width/2,height-175);
-    text("Two Lives",width/2,height-150);
+    text("Three Lives",width/2,height-150);
 
     textSize(27);
     text("GOOD LUCK",width/2,height-100)
@@ -289,14 +357,27 @@ function draw() {
     }
 
     if(player.sprite.overlap(enemies)){
+      collision = true;
       lives--;
       if (lives == 0){
+
         gameState = false;
         previousPoint = 0;
         pointcount = 1;
-        lives = 2;
+        lives = 3;
+
       }
     }
+
+    /*
+    if (collision){
+      p = new Particle(player.sprite.position.x,player.sprite.position.y);
+    }
+
+    p.sprite.bounce(enemies);
+    p.sprite.bounce(playspace.group);
+    p.update();
+    */
 
     enemies.bounce(enemies);
     enemies.bounce(playspace.group);
@@ -304,7 +385,6 @@ function draw() {
     player.sprite.collide(playspace.group);
 
     player.movement();
-    player.display();
 
     enemy1.seek(player.sprite.position);
     enemy2.seek(player.sprite.position);
@@ -315,8 +395,14 @@ function draw() {
     point.display(pointcount,previousPoint);
   }
 
- 
-  player.display();
+  //p.display();
+
+  player.display(collision);
+  count++;
+  if (count = 100000){
+    collision = false;
+    count = 0;
+  }
 
   enemy1.display();
   enemy2.display();
@@ -356,5 +442,4 @@ function draw() {
 
 
 }
-
 
