@@ -39,6 +39,8 @@ class Enemy {
     this.b = b;
     this.sprite.acceleration = createVector(0,0);
 
+    this.history = [];
+
   }
 
 
@@ -60,7 +62,6 @@ class Enemy {
       this.sprite.velocity.x = 0;
       this.sprite.velocity.y = 0;
     }
-
 
   }
 
@@ -87,6 +88,7 @@ seek(target){  //seek towards a given vecotr in the parameter
 }
 
 display() {     //displaying the enemies
+
     let theta = this.sprite.velocity.heading() + PI/2;
 
     fill(this.r,this.g,this.b);
@@ -101,6 +103,19 @@ display() {     //displaying the enemies
     pop();
     //drawSprites();
 
+    var v = createVector(this.sprite.position.x,this.sprite.position.y);
+    this.history.push(v);
+    if (this.history.length > 25){
+      this.history.splice(0,1);
+    }
+
+    for (var i = 0; i < this.history.length; i++){
+      noStroke();
+      fill(this.r,this.g,this.b,i+100)
+      rectMode(CENTER);
+      rect(this.history[i].x, this.history[i].y,i);
+    }
+
   }
 
 }
@@ -112,6 +127,7 @@ class Player {  //player class
     this.sprite = createSprite(x,y,27,27);
     this.sprite.friction = .09;  //visual feedback for when getting hit
     this.opacity = 255;
+    this.count = 0;
   }
 
   movement(){  //basic movement controls
@@ -149,7 +165,13 @@ class Player {  //player class
   }
 
   display(colDetect){
-    if(colDetect){
+    if(colDetect || (this.count<8 && this.count != 0)){
+      if (this.count < 8){
+        this.count++;
+      } else {
+        this.count = 0;
+      }
+
       this.opacity = 255;
       fill(random(0,255),random(0,255),random(0,255),this.opacity);
       stroke(200);
@@ -167,7 +189,7 @@ class Player {  //player class
       strokeWeight(2);
       rect(this.sprite.position.x+random(-30,30),this.sprite.position.y+random(-30,30),30);
 
-    } else{
+    } else {
       fill(127);
       stroke(200);
       strokeWeight(2);
@@ -175,7 +197,7 @@ class Player {  //player class
       rect(this.sprite.position.x,this.sprite.position.y,25);
     }
     if(this.opacity>0){
-      this.opacity-=5;
+      this.opacity-=1;
     } else {
       this.opacity = 0;
     }
@@ -397,6 +419,16 @@ function draw() {
 
   //p.display();
 
+  stroke(255);
+  strokeWeight(1.5);
+
+  line(enemy1.sprite.position.x,enemy1.sprite.position.y,//
+    player.sprite.position.x,player.sprite.position.y);
+
+  line(enemy2.sprite.position.x,enemy2.sprite.position.y,//
+    player.sprite.position.x,player.sprite.position.y);
+
+
   player.display(collision);
   count++;
   if (count = 100000){
@@ -406,12 +438,6 @@ function draw() {
 
   enemy1.display();
   enemy2.display();
-
-  line(enemy1.sprite.position.x,enemy1.sprite.position.y,//
-    player.sprite.position.x,player.sprite.position.y);
-
-  line(enemy2.sprite.position.x,enemy2.sprite.position.y,//
-    player.sprite.position.x,player.sprite.position.y);
 
   //drawSprites();
 
