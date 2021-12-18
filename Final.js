@@ -99,6 +99,7 @@ display() {     //displaying the enemies
     rotate(theta); 
     rectMode(CENTER);
     rect(0,0,25);
+    fill(255);
     rect(0,-13,8);
     pop();
     //drawSprites();
@@ -165,8 +166,12 @@ class Player {  //player class
   }
 
   display(colDetect){
-    if(colDetect || (this.count<8 && this.count != 0)){
-      if (this.count < 8){
+    if(colDetect || (this.count < 11 && this.count != 0)){
+
+      //when collision is detected, starts a count for 
+      //how many loops it will draw the visual feedback. Right now its 11 times
+
+      if (this.count < 11){
         this.count++;
       } else {
         this.count = 0;
@@ -311,6 +316,8 @@ let start;
 let pause = false;
 let end;
 
+let textOpacity = 255;
+
 let collision = false;
 let count;  //counting frames for showing visual feedback for player collision
 
@@ -342,15 +349,21 @@ function setup() {
 
 function draw() {
 
-  background(100);
+  background(220);
   fill(10,30,40);
   rect(25,25,width-50,height-50);
 
   if (pause || !gameState){
 
+    if (textOpacity < 255){
+      textOpacity += 10;
+    } else{
+      textOpacity = 255;
+    }
+
     textAlign(CENTER,CENTER);
     textSize(50);
-    fill(255);
+    fill(255,255,255,textOpacity);
     text("JUKE THE BOX",width/2,height/2-60);
     textSize(18);
     text("HIGH SCORE: "+highScore,width/2,height/2-25);
@@ -363,12 +376,37 @@ function draw() {
 
     textSize(27);
     text("GOOD LUCK",width/2,height-100)
-    
-    if(keyDown("w") || keyDown("a") || keyDown("s") || keyDown("d")){
-      gameState = true;
+
+    if (textOpacity == 255){
+      if(keyDown("w") || keyDown("a") || keyDown("s") || keyDown("d")){
+        gameState = true;
+      }
     }
+    
 
   } else if (gameState){ 
+
+    if (textOpacity > 0){
+      textOpacity -= 5;
+    } else{
+      textOpacity = 0;
+    }
+
+    textAlign(CENTER,CENTER);
+    textSize(50);
+    fill(255,255,255,textOpacity);
+    text("JUKE THE BOX",width/2,height/2-60);
+    textSize(18);
+    text("HIGH SCORE: "+highScore,width/2,height/2-25);
+
+    textSize(18);
+    text("W, A, S, D to Move",width/2,height-225);
+    text("Dodge Red And Yellow",width/2,height-200);
+    text("Get As Much Points",width/2,height-175);
+    text("Three Lives",width/2,height-150);
+
+    textSize(27);
+    text("GOOD LUCK",width/2,height-100)
 
     if(point.test(player.sprite)){  //Point system/Highscore system
       previousPoint = pointcount;
@@ -380,7 +418,7 @@ function draw() {
 
     if(player.sprite.overlap(enemies)){
       collision = true;
-      lives--;
+      lives --;
       if (lives == 0){
 
         gameState = false;
